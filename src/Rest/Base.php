@@ -156,16 +156,7 @@ abstract class Base
      */
     protected static function baseFind(Session $session, array $ids = [], array $params = []): array
     {
-        try {
-            $response = self::request("get", "get", $session, $ids, $params);
-        } catch (RestResourceException | RestResourceRequestException $e) {
-            // If no orders can be found, the API will return a 404
-            if ($e->getStatusCode() === 404) {
-                return [];
-            }
-
-            throw $e;
-        }
+        $response = self::request("get", "get", $session, $ids, $params);
 
         static::$NEXT_PAGE_QUERY = static::$PREV_PAGE_QUERY = null;
         $pageInfo = $response->getPageInfo();

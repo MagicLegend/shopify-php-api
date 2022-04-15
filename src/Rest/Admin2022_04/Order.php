@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Shopify\Rest\Admin2022_04;
 
 use Shopify\Auth\Session;
+use Shopify\Exception\RestResourceException;
+use Shopify\Exception\RestResourceRequestException;
 use Shopify\Rest\Base;
 
 /**
@@ -117,6 +119,10 @@ class Order extends Base
      *     fields
      *
      * @return Order|null
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public static function find(
         Session $session,
@@ -124,11 +130,19 @@ class Order extends Base
         array $urlIds = [],
         array $params = []
     ): ?Order {
-        $result = parent::baseFind(
-            $session,
-            array_merge(["id" => $id], $urlIds),
-            $params,
-        );
+        try {
+            $result = parent::baseFind(
+                $session,
+                array_merge(["id" => $id], $urlIds),
+                $params,
+            );
+        } catch (RestResourceException | RestResourceRequestException $e) {
+            // If no orders can be found, the API will return a 404
+            if ($e->getStatusCode() === 404) {
+                return null;
+            }
+        }
+
         return !empty($result) ? $result[0] : null;
     }
 
@@ -139,6 +153,12 @@ class Order extends Base
      * @param mixed[] $params
      *
      * @return array|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public static function delete(
         Session $session,
@@ -177,6 +197,12 @@ class Order extends Base
      *     fields
      *
      * @return Order[]
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public static function all(
         Session $session,
@@ -203,6 +229,12 @@ class Order extends Base
      *     fulfillment_status
      *
      * @return array|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public static function count(
         Session $session,
@@ -232,6 +264,12 @@ class Order extends Base
      * @param array|string $body
      *
      * @return array|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public function cancel(
         array $params = [],
@@ -255,6 +293,12 @@ class Order extends Base
      * @param array|string $body
      *
      * @return array|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public function close(
         array $params = [],
@@ -278,6 +322,12 @@ class Order extends Base
      * @param array|string $body
      *
      * @return array|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     public function open(
         array $params = [],
@@ -295,5 +345,4 @@ class Order extends Base
 
         return $response->getDecodedBody();
     }
-
 }
