@@ -10,6 +10,7 @@ use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Log\LogLevel;
 use Shopify\Context;
+use Composer\Semver\VersionParser;
 
 class Http
 {
@@ -165,11 +166,19 @@ class Http
 
         $query = preg_replace("/%5B[0-9]+%5D/", "%5B%5D", http_build_query($query));
 
+        // TODO: Add ->withUserInfo(user,password) with apikey,apipassword variables
+        // Only if private app?
         $url = (new Uri())
             ->withScheme('https')
             ->withHost($this->domain)
             ->withPath($this->getRequestPath($path))
             ->withQuery($query);
+
+        // Not sure if this should only be for private apps?
+        // TODO: Read up more about how the auth works.
+        if (Context::$IS_PRIVATE_APP) {
+            $url->withUserInfo(Context::$API_KEY, Context::$API_PASSWORD);
+        }
 
         $request = new Request($method, $url, $headers);
         $request = $request->withHeader(HttpHeaders::USER_AGENT, implode(' | ', $userAgentParts));
@@ -192,7 +201,14 @@ class Http
         do {
             $currentTries++;
 
-            $response = HttpResponse::fromResponse($client->sendRequest($request));
+            $isGuzzlehttpV6 = \Composer\InstalledVersions::satisfies(new VersionParser(), 'guzzlehttp/guzzle', '^6.3');
+
+            if ($isGuzzlehttpV6) {
+                // TODO: Should this be caught?
+                $response = HttpResponse::fromResponse($client->send($request));
+            } else {
+                $response = HttpResponse::fromResponse($client->sendRequest($request));
+            }
 
             if (in_array($response->getStatusCode(), self::RETRIABLE_STATUS_CODES)) {
                 $retryAfter = $response->hasHeader(HttpHeaders::RETRY_AFTER)

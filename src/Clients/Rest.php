@@ -43,7 +43,7 @@ class Rest extends Http
         string $dataType = self::DATA_TYPE_JSON
     ): RestResponse {
         $headers[HttpHeaders::X_SHOPIFY_ACCESS_TOKEN] =
-            Context::$IS_PRIVATE_APP ? Context::$API_SECRET_KEY : $this->accessToken;
+            Context::$IS_PRIVATE_APP ? Context::$PRIVATE_APP_STOREFRONT_ACCESS_TOKEN : $this->accessToken;
 
         $response = parent::request($path, $method, $body, $headers, $query, $tries, $dataType);
 

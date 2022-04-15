@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Shopify\Clients;
 
 use GuzzleHttp\Client;
-use Psr\Http\Client\ClientInterface;
 
 class HttpClientFactory
 {
     /**
-     * @codeCoverageIgnore This is mocked for tests
+     * @returns \Psr\Http\Client\ClientInterface|\GuzzleHttp\ClientInterface
      */
-    public function client(): ClientInterface
+    public function client(): Client
     {
         return new Client();
     }
