@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ShopifyTest;
 
+use Composer\Semver\VersionParser;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -96,22 +97,43 @@ class BaseTestCase extends TestCase
             );
         }
 
-        $client = $this->createMock(ClientInterface::class);
+        $isGuzzlehttpV6 = \Composer\InstalledVersions::satisfies(new VersionParser(), 'guzzlehttp/guzzle', '^6.3');
 
-        $i = 0;
-        $client->expects($this->exactly(count($requestMatchers)))
-            ->method('sendRequest')
-            ->withConsecutive(...$requestMatchers)
-            ->willReturnCallback(
-                function () use (&$i, $newResponses) {
-                    $response = $newResponses[$i++];
-                    if ($response === 'TEST EXCEPTION') {
-                        throw new HttpRequestException();
-                    } else {
-                        return $response;
+        if ($isGuzzlehttpV6) {
+            $client = $this->createMock(\GuzzleHttp\ClientInterface::class);
+
+            $i = 0;
+            $client->expects($this->exactly(count($requestMatchers)))
+                ->method('send')
+                ->withConsecutive(...$requestMatchers)
+                ->willReturnCallback(
+                    function () use (&$i, $newResponses) {
+                        $response = $newResponses[$i++];
+                        if ($response === 'TEST EXCEPTION') {
+                            throw new HttpRequestException();
+                        } else {
+                            return $response;
+                        }
                     }
-                }
-            );
+                );
+        } else {
+            $client = $this->createMock(ClientInterface::class);
+
+            $i = 0;
+            $client->expects($this->exactly(count($requestMatchers)))
+                ->method('sendRequest')
+                ->withConsecutive(...$requestMatchers)
+                ->willReturnCallback(
+                    function () use (&$i, $newResponses) {
+                        $response = $newResponses[$i++];
+                        if ($response === 'TEST EXCEPTION') {
+                            throw new HttpRequestException();
+                        } else {
+                            return $response;
+                        }
+                    }
+                );
+        }
 
         $factory = $this->createMock(HttpClientFactory::class);
 

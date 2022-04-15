@@ -166,8 +166,6 @@ class Http
 
         $query = preg_replace("/%5B[0-9]+%5D/", "%5B%5D", http_build_query($query));
 
-        // TODO: Add ->withUserInfo(user,password) with apikey,apipassword variables
-        // Only if private app?
         $url = (new Uri())
             ->withScheme('https')
             ->withHost($this->domain)
@@ -177,7 +175,7 @@ class Http
         // Not sure if this should only be for private apps?
         // TODO: Read up more about how the auth works.
         if (Context::$IS_PRIVATE_APP) {
-            $url->withUserInfo(Context::$API_KEY, Context::$API_PASSWORD);
+            $url->withUserInfo(Context::$API_KEY, Context::$API_SECRET_KEY);
         }
 
         $request = new Request($method, $url, $headers);
