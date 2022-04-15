@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Shopify\Clients;
 
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
@@ -202,11 +203,16 @@ class Http
             $isGuzzlehttpV6 = \Composer\InstalledVersions::satisfies(new VersionParser(), 'guzzlehttp/guzzle', '^6.3');
 
             if ($isGuzzlehttpV6) {
-                // TODO: Should this be caught?
-                $response = HttpResponse::fromResponse($client->send($request));
+                try {
+                    $response = $client->send($request);
+                } catch (GuzzleException $e) {
+                    $response = $e->getResponse();
+                }
             } else {
-                $response = HttpResponse::fromResponse($client->sendRequest($request));
+                $response = $client->sendRequest($request);
             }
+
+            $response = HttpResponse::fromResponse($response);
 
             if (in_array($response->getStatusCode(), self::RETRIABLE_STATUS_CODES)) {
                 $retryAfter = $response->hasHeader(HttpHeaders::RETRY_AFTER)

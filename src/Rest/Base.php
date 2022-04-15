@@ -143,13 +143,29 @@ abstract class Base
     }
 
     /**
+     * @param Session $session
      * @param string[]|int[] $ids
-     *
+     * @param array $params
      * @return static[]
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     protected static function baseFind(Session $session, array $ids = [], array $params = []): array
     {
-        $response = self::request("get", "get", $session, $ids, $params);
+        try {
+            $response = self::request("get", "get", $session, $ids, $params);
+        } catch (RestResourceException | RestResourceRequestException $e) {
+            // If no orders can be found, the API will return a 404
+            if ($e->getStatusCode() === 404) {
+                return [];
+            }
+
+            throw $e;
+        }
 
         static::$NEXT_PAGE_QUERY = static::$PREV_PAGE_QUERY = null;
         $pageInfo = $response->getPageInfo();
@@ -162,7 +178,20 @@ abstract class Base
     }
 
     /**
-     * @param static $entity
+     * @param string $httpMethod
+     * @param string $operation
+     * @param Session $session
+     * @param array $ids
+     * @param array $params
+     * @param array $body
+     * @param Base|null $entity
+     * @return RestResponse
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
      */
     protected static function request(
         string $httpMethod,
@@ -178,6 +207,7 @@ abstract class Base
         $client = new Rest($session->getShop(), $session->getAccessToken());
 
         $params = array_filter($params);
+        // TODO: Default throw useful error for dev
         switch ($httpMethod) {
             case "get":
                 $response = $client->get($path, [], $params);
@@ -210,7 +240,12 @@ abstract class Base
     }
 
     /**
+     * @param string $httpMethod
+     * @param string $operation
      * @param string[]|int[] $ids
+     * @param Base|null $entity
+     * @return string|null
+     * @throws RestResourceException
      */
     private static function getPath(
         string $httpMethod,
@@ -259,7 +294,10 @@ abstract class Base
     }
 
     /**
+     * @param RestResponse $response
+     * @param Session $session
      * @return static[]
+     * @throws \JsonException|RestResourceException
      */
     private static function createInstancesFromResponse(RestResponse $response, Session $session): array
     {
@@ -287,9 +325,13 @@ abstract class Base
     }
 
     /**
+     * @param array $data
+     * @param Session $session
+     * @param null $instance
      * @return static
+     * @throws RestResourceException
      */
-    private static function createInstance(array $data, Session $session, &$instance = null)
+    private static function createInstance(array $data, Session $session, &$instance = null): Base
     {
         $instance = $instance ?: new static($session);
 
