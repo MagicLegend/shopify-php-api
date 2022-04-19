@@ -57,7 +57,17 @@ abstract class Base
         }
     }
 
-    public function save($updateObject = false): void
+    /**
+     * @param bool $updateObject
+     * @return array|string|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
+     */
+    public function save(bool $updateObject = false)
     {
         $data = self::dataDiff($this->toArray(), $this->originalState);
 
@@ -71,11 +81,22 @@ abstract class Base
 
             self::createInstance($body[$this->getJsonBodyName()], $this->session, $this);
         }
+
+        return $response->getDecodedBody();
     }
 
-    public function saveAndUpdate(): void
+    /**
+     * @return array|string|null
+     * @throws RestResourceException
+     * @throws RestResourceRequestException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
+     */
+    public function saveAndUpdate()
     {
-        $this->save(true);
+        return $this->save(true);
     }
 
     public function __get(string $name)
