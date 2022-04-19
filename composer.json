@@ -36,8 +36,8 @@
         "psr/log": "^1.1",
         "firebase/php-jwt": "^5.2",
         "psr/http-client": "^1.0",
-        "guzzlehttp/guzzle": "^6.3",
-        "doctrine/inflector": "^1.0",
+        "guzzlehttp/guzzle": "^6.3 || ^7.0",
+        "doctrine/inflector": "^1.0 || ^2.0",
         "composer/semver": "^1.0",
         "ext-json": "*"
     },

@@ -12,6 +12,9 @@ jobs:
           - "7.4"
           - "8.0"
           - "8.1"
+        guzzlehttp-version:
+          - "^6.3"
+          - "^7.0"
     steps:
       - uses: actions/checkout@master
 
@@ -22,6 +25,9 @@ jobs:
           tools: composer:v2, phpcs
           coverage: xdebug
           ini-values: ${{ env.PHP_INI_VALUES }}
+
+      - name: Fixate guzzle version
+        run: composer require guzzlehttp/guzzle:${{ matrix.guzzlehttp-version }} --with-all-dependencies --no-ansi --no-interaction --no-progress
 
       - name: Install dependencies with composer
         run: composer update --no-ansi --no-interaction --no-progress
