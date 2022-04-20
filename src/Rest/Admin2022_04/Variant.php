@@ -43,6 +43,7 @@ class Variant extends Base
     protected static array $PATHS = [
         ["http_method" => "delete", "operation" => "delete", "ids" => ["product_id", "id"], "path" => "products/<product_id>/variants/<id>.json"],
         ["http_method" => "get", "operation" => "count", "ids" => ["product_id"], "path" => "products/<product_id>/variants/count.json"],
+        ["http_method" => "get", "operation" => "count", "ids" => [], "path" => "variants/count.json"],
         ["http_method" => "get", "operation" => "get", "ids" => ["product_id"], "path" => "products/<product_id>/variants.json"],
         ["http_method" => "get", "operation" => "get", "ids" => ["id"], "path" => "variants/<id>.json"],
         ["http_method" => "get", "operation" => "get", "ids" => [], "path" => "variants.json"],
