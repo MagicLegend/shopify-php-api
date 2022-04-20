@@ -381,4 +381,29 @@ final class Variant202204Test extends BaseTestCase
         );
     }
 
+    /**
+     * This test is for an undocumented API call that will return all variants of all products
+     * @return void
+     */
+    public function test_13(): void
+    {
+        $this->mockTransportRequests([
+            new MockRequest(
+                $this->buildMockHttpResponse(200, json_encode(
+                    []
+                )),
+                "https://test-shop.myshopify.io/admin/api/2022-04/variants.json",
+                "GET",
+                null,
+                [
+                    "X-Shopify-Access-Token: this_is_a_test_token",
+                ],
+            ),
+        ]);
+
+        Variant::all(
+            $this->test_session
+        );
+    }
+
 }

@@ -45,6 +45,7 @@ class Variant extends Base
         ["http_method" => "get", "operation" => "count", "ids" => ["product_id"], "path" => "products/<product_id>/variants/count.json"],
         ["http_method" => "get", "operation" => "get", "ids" => ["product_id"], "path" => "products/<product_id>/variants.json"],
         ["http_method" => "get", "operation" => "get", "ids" => ["id"], "path" => "variants/<id>.json"],
+        ["http_method" => "get", "operation" => "get", "ids" => [], "path" => "variants.json"],
         ["http_method" => "post", "operation" => "post", "ids" => ["product_id"], "path" => "products/<product_id>/variants.json"],
         ["http_method" => "put", "operation" => "put", "ids" => ["id"], "path" => "variants/<id>.json"]
     ];
