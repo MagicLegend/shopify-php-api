@@ -264,7 +264,10 @@ class Http
             return;
         }
 
-        file_put_contents($warningFilePath, time());
+        // Verify if the parent folder is writable to prevent issues with read-only filesystems
+        if (is_writable(dirname($warningFilePath))) {
+            file_put_contents($warningFilePath, time());
+        }
 
         $e = new Exception();
         $stackTrace = str_replace("\n", "\n    ", $e->getTraceAsString());
